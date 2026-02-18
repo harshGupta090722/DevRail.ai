@@ -155,7 +155,7 @@
                 $("#trail").css("display", "none", "important");
             }
         });
-        
+
     };
     /* Setting Color
     -------------------------------------------------------------------------*/
@@ -207,15 +207,15 @@
         }
 
         function updatePrices(isYearly) {
-            $('.price-number').each(function() {
-            const $p = $(this);
-            const val = isYearly ? $p.data('year') : $p.data('month');
-            $p.text(formatUSD(val));
-            $p.next('.price-per').text(isYearly ? '/ year' : '/ month');
+            $('.price-number').each(function () {
+                const $p = $(this);
+                const val = isYearly ? $p.data('year') : $p.data('month');
+                $p.text(formatUSD(val));
+                $p.next('.price-per').text(isYearly ? '/ year' : '/ month');
             });
         }
 
-        $('#pricingSwitch').on('change', function() {
+        $('#pricingSwitch').on('change', function () {
             updatePrices(this.checked);
         });
 
@@ -228,15 +228,15 @@
     /* services_btn
     -------------------------------------------------------------------------*/
     var services_btn = () => {
-        $('.services-image-btn').on('click', function(){
-            if(!$(this).hasClass('active-img')) {
+        $('.services-image-btn').on('click', function () {
+            if (!$(this).hasClass('active-img')) {
                 $('.services-image-btn').removeClass('active-img');
                 $(this).addClass('active-img');
-    
+
                 const newImg = $(this).data('img');
                 $('.services-image').find('img').css('opacity', 0);
                 setTimeout(() => {
-                  $('.services-image').find('img').attr('src', newImg).css('opacity', 1);
+                    $('.services-image').find('img').attr('src', newImg).css('opacity', 1);
                 }, 200);
             }
         });
@@ -244,25 +244,25 @@
     // counter
     var counter = function () {
         if ($(document.body).hasClass("counter-scroll")) {
-          var a = 0;
-          $(window).scroll(function () {
-            var oTop = $(".counter").offset().top - window.innerHeight;
-            if (a == 0 && $(window).scrollTop() > oTop) {
-              if ($().countTo) {
-                $(".counter")
-                  .find(".number")
-                  .each(function () {
-                    var to = $(this).data("to"),
-                      speed = $(this).data("speed");
-                    $(this).countTo({
-                      to: to,
-                      speed: speed,
-                    });
-                  });
-              }
-              a = 1;
-            }
-          });
+            var a = 0;
+            $(window).scroll(function () {
+                var oTop = $(".counter").offset().top - window.innerHeight;
+                if (a == 0 && $(window).scrollTop() > oTop) {
+                    if ($().countTo) {
+                        $(".counter")
+                            .find(".number")
+                            .each(function () {
+                                var to = $(this).data("to"),
+                                    speed = $(this).data("speed");
+                                $(this).countTo({
+                                    to: to,
+                                    speed: speed,
+                                });
+                            });
+                    }
+                    a = 1;
+                }
+            });
         }
     };
     // dot
@@ -294,7 +294,7 @@
     var viewbox = function () {
         document.querySelectorAll("svg[data-viewbox-desktop]").forEach(svg => {
             const desktopViewBox = svg.dataset.viewboxDesktop;
-            const mobileViewBox  = svg.dataset.viewboxMobile;
+            const mobileViewBox = svg.dataset.viewboxMobile;
             const mq = window.matchMedia("(max-width: 767px)");
             const updateViewBox = e => {
                 svg.setAttribute(
@@ -307,7 +307,98 @@
         });
     };
 
-    // Dom Ready
+    /* Timeline Hover Effect */
+    var timelineHover = function () {
+        document.querySelectorAll('.timeline-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const center = rect.width / 2;
+                const move = (x - center) / 20;
+
+                card.style.transform =
+                    `translateY(-8px) scale(1.02) rotateY(${move}deg)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+    };
+
+    /* Roadmap Hover Progress */
+    /* Roadmap Hover Progress - FIXED */
+    var roadmapProgress = function () {
+
+        const steps = document.querySelectorAll('.step');
+        const activePath = document.getElementById('activePath');
+
+        if (!steps.length || !activePath) return;
+
+        // Get REAL SVG path length
+        const pathLength = activePath.getTotalLength();
+
+        // Set initial state
+        activePath.style.strokeDasharray = pathLength;
+        activePath.style.strokeDashoffset = pathLength;
+
+        steps.forEach((step, index) => {
+
+            step.addEventListener('mouseenter', function () {
+
+                // Calculate progress dynamically
+                const progress = ((index + 1) / steps.length) * pathLength;
+
+                activePath.style.strokeDashoffset = pathLength - progress;
+            });
+
+            step.addEventListener('mouseleave', function () {
+                activePath.style.strokeDashoffset = pathLength;
+            });
+
+        });
+
+    };
+
+    function randomRoadmapDesc() {
+        document.querySelectorAll('.step').forEach(step => {
+
+            const desc = step.querySelector('.desc');
+            if (!desc) return;
+
+            step.addEventListener('mouseenter', () => {
+
+                const corners = [
+                    { top: '80px', left: '80px' },
+                    { top: '80px', right: '80px' },
+                    { bottom: '80px', left: '80px' },
+                    { bottom: '80px', right: '80px' }
+                ];
+
+                const randomCorner = corners[Math.floor(Math.random() * corners.length)];
+
+                /* Reset previous position */
+                desc.style.top = '';
+                desc.style.bottom = '';
+                desc.style.left = '';
+                desc.style.right = '';
+
+                Object.assign(desc.style, randomCorner);
+
+                desc.style.opacity = '1';
+            });
+
+            step.addEventListener('mouseleave', () => {
+                desc.style.opacity = '0';
+            });
+
+        });
+    }
+
+    /* ===============================
+       DOM READY
+    =============================== */
+
     $(function () {
         infiniteSlide();
         updateClock();
@@ -320,5 +411,9 @@
         counter();
         dot();
         viewbox();
+        timelineHover();
+        roadmapProgress();
+        randomRoadmapDesc();   // ← call it here
     });
+
 })(jQuery);
