@@ -15,6 +15,31 @@
 (function ($) {
     "use strict";
 
+
+    // Calendar Modal
+    if ($('.open-calendar').length) {
+
+        $('.open-calendar').on('click', function () {
+            $('#calendarModal').addClass('active');
+            $('body').css('overflow', 'hidden'); // prevent background scroll
+        });
+
+        $('.close-calendar').on('click', function () {
+            $('#calendarModal').removeClass('active');
+            $('body').css('overflow', 'auto');
+        });
+
+        // Close when clicking outside modal content
+        $('#calendarModal').on('click', function (e) {
+            if (!$(e.target).closest('.calendar-modal-content').length) {
+                $(this).removeClass('active');
+                $('body').css('overflow', 'auto');
+            }
+        });
+    }
+
+
+
     /* Go Top
     -------------------------------------------------------------------------*/
     var goTop = function () {
@@ -326,78 +351,37 @@
         });
     };
 
-    /* Roadmap Hover Progress */
-    /* Roadmap Hover Progress - FIXED */
-    var roadmapProgress = function () {
+    /* ===============================
+   ABOUT PAGE FOUNDER SCROLL FADE
+================================ */
 
-        const steps = document.querySelectorAll('.step');
-        const activePath = document.getElementById('activePath');
+    const aboutDescs = document.querySelectorAll('.aboutPage-founder-desc');
 
-        if (!steps.length || !activePath) return;
+    if (aboutDescs.length) {
 
-        // Get REAL SVG path length
-        const pathLength = activePath.getTotalLength();
+        function handleAboutPageFounderFade() {
 
-        // Set initial state
-        activePath.style.strokeDasharray = pathLength;
-        activePath.style.strokeDashoffset = pathLength;
+            const trigger = window.innerHeight * 0.85;
 
-        steps.forEach((step, index) => {
+            aboutDescs.forEach((desc, index) => {
 
-            step.addEventListener('mouseenter', function () {
+                const rect = desc.getBoundingClientRect();
 
-                // Calculate progress dynamically
-                const progress = ((index + 1) / steps.length) * pathLength;
+                if (rect.top < trigger) {
 
-                activePath.style.strokeDashoffset = pathLength - progress;
+                    // delay right one slightly
+                    setTimeout(() => {
+                        desc.classList.add('aboutPage-active');
+                    }, index * 200);
+
+                }
             });
+        }
 
-            step.addEventListener('mouseleave', function () {
-                activePath.style.strokeDashoffset = pathLength;
-            });
-
-        });
-
-    };
-
-    function randomRoadmapDesc() {
-        document.querySelectorAll('.step').forEach(step => {
-
-            const desc = step.querySelector('.desc');
-            if (!desc) return;
-
-            step.addEventListener('mouseenter', () => {
-
-                const corners = [
-                    { top: '80px', left: '80px' },
-                    { top: '80px', right: '80px' },
-                    { bottom: '80px', left: '80px' },
-                    { bottom: '80px', right: '80px' }
-                ];
-
-                const randomCorner = corners[Math.floor(Math.random() * corners.length)];
-
-                /* Reset previous position */
-                desc.style.top = '';
-                desc.style.bottom = '';
-                desc.style.left = '';
-                desc.style.right = '';
-
-                Object.assign(desc.style, randomCorner);
-
-                desc.style.opacity = '1';
-            });
-
-            step.addEventListener('mouseleave', () => {
-                desc.style.opacity = '0';
-            });
-
-        });
+        window.addEventListener('scroll', handleAboutPageFounderFade);
+        handleAboutPageFounderFade();
     }
 
-    /* ===============================
-       DOM READY
-    =============================== */
 
     $(function () {
         infiniteSlide();
@@ -412,8 +396,64 @@
         dot();
         viewbox();
         timelineHover();
-        roadmapProgress();
-        randomRoadmapDesc();   // ← call it here
+
+        /* ===============================
+FORM SUBMIT
+================================ */
+
+        const form = document.querySelector(".form-contact");
+
+        if (form) {
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                const data = new FormData(form);
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: form.method,
+                        body: data,
+                        headers: { "Accept": "application/json" }
+                    });
+
+                    if (response.ok) {
+                        this.reset();
+
+                        const successMsg = document.createElement("div");
+                        successMsg.className = "form-success-message";
+                        successMsg.innerText = "Your message has been sent successfully! ,We will reach out to you shortly!";
+
+                        this.appendChild(successMsg);
+
+                        setTimeout(() => {
+                            successMsg.remove();
+                        }, 4000);
+                    }
+                } catch (error) {
+                    console.error("Form submission error:", error);
+                }
+            });
+        }
+
+        // Founder Scroll Animation
+        const founders = document.querySelectorAll('.founder-desc');
+
+        function handleFounderScroll() {
+            const triggerPoint = window.innerHeight * 0.75;
+
+            founders.forEach(desc => {
+                const rect = desc.getBoundingClientRect();
+
+                if (rect.top < triggerPoint) {
+                    desc.classList.add('active');
+                } else {
+                    desc.classList.remove('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', handleFounderScroll);
+        handleFounderScroll(); // run once on load
     });
 
 })(jQuery);
