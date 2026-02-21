@@ -383,6 +383,7 @@
     }
 
 
+
     $(function () {
         infiniteSlide();
         updateClock();
@@ -454,6 +455,50 @@ FORM SUBMIT
 
         window.addEventListener('scroll', handleFounderScroll);
         handleFounderScroll(); // run once on load
+
+        /* ===============================
+TYPEWRITER EFFECT
+================================ */
+
+        if ($("#typewriter").length) {
+
+            const texts = [
+                "Turning ideas into scalable digital realities.",
+                "Engineering clarity in a world of complexity.",
+                "Where performance meets precision.",
+                "Built for speed. Designed for growth.",
+                "Smart systems for ambitious teams."
+            ];
+
+            let index = 0;
+            let charIndex = 0;
+            const speed = 60;
+            const delayBetweenLines = 1500;
+            const element = document.getElementById("typewriter");
+
+            function type() {
+                if (charIndex < texts[index].length) {
+                    element.textContent += texts[index].charAt(charIndex);
+                    charIndex++;
+                    setTimeout(type, speed);
+                } else {
+                    setTimeout(erase, delayBetweenLines);
+                }
+            }
+
+            function erase() {
+                if (charIndex > 0) {
+                    element.textContent = texts[index].substring(0, charIndex - 1);
+                    charIndex--;
+                    setTimeout(erase, speed / 2);
+                } else {
+                    index = (index + 1) % texts.length;
+                    setTimeout(type, 300);
+                }
+            }
+
+            type();
+        }
     });
 
 })(jQuery);
